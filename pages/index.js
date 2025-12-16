@@ -1,78 +1,170 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import React, {useState, useEffect, useRef} from 'react';
+import Head from 'next/head';
+import Layout from '../components/Layout';
+import DocumentList from '../components/DocumentList';
+import {Upload, Loader2, AlertCircle} from 'lucide-react';
+import {clsx} from 'clsx';
 
 export default function Home() {
-  return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black`}
-    >
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the index.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs/pages/getting-started?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+	const [documents, setDocuments] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [uploading, setUploading] = useState(false);
+	const [error, setError] = useState(null);
+	const [isDragging, setIsDragging] = useState(false);
+	const fileInputRef = useRef(null);
+
+	const fetchDocuments = async () => {
+		try {
+			const res = await fetch('/api/documents');
+			if (!res.ok) throw new Error('Failed to fetch documents');
+			const data = await res.json();
+			setDocuments(data?.documents);
+		} catch (err) {
+			setError(err?.message);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleDrag = e => {
+		e?.preventDefault();
+		e?.stopPropagation();
+		if (e?.type === 'dragenter' || e?.type === 'dragover') {
+			setIsDragging(true);
+		} else if (e?.type === 'dragleave') {
+			setIsDragging(false);
+		}
+	};
+
+	const handleDrop = async e => {
+		e?.preventDefault();
+		e?.stopPropagation();
+		setIsDragging(false);
+
+		if (e?.dataTransfer?.files && e?.dataTransfer?.files[0]) {
+			await handleUpload(e?.dataTransfer?.files[0]);
+		}
+	};
+
+	const handleFileSelect = async e => {
+		const file = e?.target?.files?.[0];
+		if (file) {
+			await handleUpload(file);
+		}
+	};
+
+	const handleUpload = async file => {
+		setUploading(true);
+		setError(null);
+		const formData = new FormData();
+		formData.append('file', file);
+		try {
+			const res = await fetch('/api/upload', {
+				method: 'POST',
+				body: formData,
+			});
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.error || 'Upload failed');
+			}
+			await fetchDocuments();
+		} catch (err) {
+			setError(err?.message);
+		} finally {
+			setUploading(false);
+			if (fileInputRef.current) {
+				fileInputRef.current.value = '';
+			}
+		}
+	};
+
+	useEffect(() => {
+		fetchDocuments();
+	}, []);
+
+	return (
+		<Layout>
+			<Head>
+				<title>Documents - DocVault</title>
+			</Head>
+
+			<div className="flex flex-col space-y-8">
+				<div className="flex items-center justify-between">
+					<div>
+						<h1 className="text-3xl font-bold tracking-tight">Documents</h1>
+						<p className="text-gray-400  mt-1">
+							Manage and analyze your uploaded files.
+						</p>
+					</div>
+				</div>
+				<div
+					onDragEnter={handleDrag}
+					onDragLeave={handleDrag}
+					onDragOver={handleDrag}
+					onDrop={handleDrop}
+					className={clsx(
+						'border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer group select-none',
+						isDragging
+							? 'border-blue-500 bg-blue-900/20 '
+							: 'border-zinc-800  hover:border-blue-400  bg-black/50 ',
+					)}
+					onClick={() => fileInputRef?.current?.click()}>
+					<input
+						type="file"
+						ref={fileInputRef}
+						className="hidden"
+						onChange={handleFileSelect}
+						accept=".txt,.md,.pdf,.json"
+					/>
+
+					<div
+						className={clsx(
+							'p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm transition-colors',
+							isDragging
+								? 'bg-blue-900/20 '
+								: 'bg-zinc-900  group-hover:bg-blue-900/20 ',
+						)}>
+						{uploading ? (
+							<Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+						) : (
+							<Upload
+								className={clsx(
+									'w-8 h-8',
+									isDragging
+										? 'text-blue-400'
+										: 'text-gray-400 group-hover:text-blue-500',
+								)}
+							/>
+						)}
+					</div>
+
+					<h3 className="text-lg font-medium text-white ">
+						{uploading
+							? 'Uploading...'
+							: isDragging
+							? 'Drop file here'
+							: 'Click or Drag & Drop to Upload'}
+					</h3>
+					<p className="text-gray-400 max-w-sm mx-auto mt-2 text-sm">
+						Support for PDF, TXT, MD, JSON
+					</p>
+				</div>
+
+				{error && (
+					<div className="p-4 rounded-lg bg-red-900/20 text-red-200 border border-red-900/30 flex items-center">
+						<AlertCircle className="w-5 h-5 mr-2 text-red-400" />
+						{error}
+					</div>
+				)}
+
+				{loading ? (
+					<div className="flex justify-center py-12">
+						<Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+					</div>
+				) : (
+					<DocumentList documents={documents} onRefresh={fetchDocuments} />
+				)}
+			</div>
+		</Layout>
+	);
 }

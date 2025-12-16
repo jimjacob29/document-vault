@@ -1,40 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# AI Document Vault (Frontend Prototype)
 
-## Getting Started
+A modern, responsive document management dashboard built with **Next.js**, **React**, and **Tailwind CSS**. This prototype demonstrates a premium user interface for uploading, managing, and analyzing documents with AI-powered features.
 
-First, run the development server:
+## 🚀 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Modern UI/UX**: clean, "hacker-style" dark theme layout using Tailwind CSS.
+- **Drag & Drop Upload**: Integrated file upload zone with visual feedback states.
+- **Document Preview**:
+  - **PDF Viewer**: Native iframe integration for viewing original documents.
+  - **AI Summary**: Mock AI analysis for generating executive summaries.
+  - **Markdown View**: Clean code-like view for structured document content.
+- **Interactive Dashboard**: Real-time analytics charts (total docs, storage, type distribution).
+- **Responsive Design**: Mobile-friendly sidebar and layout.
+- **Dynamic Data**: Mock APIs simulating backend data fetching for documents and user profiles.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠 Tech Stack
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+- **Framework**: [Next.js](https://nextjs.org/) (React Framework)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) (Utility-first CSS)
+- **Icons**: [Lucide React](https://lucide.dev/) (Consistent, clean SVG icons)
+- **Utilities**: `clsx` for conditional class management.
+- **File Handling**: `formidable` (API side) for managing file uploads.
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+## 🏗 Component Architecture
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+The application is structured for modularity and reusability:
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Pages**:
+  - `pages/index.js`: Main document list and upload area.
+  - `pages/dashboard.js`: Analytics overview.
+  - `pages/document/[id].js`: Detail view with tabbed interface.
+- **Components**:
+  - `Layout.js`: App shell with sidebar navigation and dynamic user profile.
+  - `DocumentList.js`: Reusable list item component with dropdown actions.
+  - `Loader.js`: Unified loading spinner.
+  - `tabs/`: Modular tab content (`SummaryTab`, `MarkdownTab`, `OriginalTab`).
 
-## Learn More
+## 💻 Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+1.  **Install dependencies**:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2.  **Run the development server**:
 
-## Deploy on Vercel
+    ```bash
+    npm run dev
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3.  **Open the app**:
+    Visit [http://localhost:3000](http://localhost:3000)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+## 🎨 Theme
+
+The project uses a custom theme by default:
+
+- **Backgrounds**: Zinc 900/950 (`#0a0a0a`)
+- **Accents**: Indigo & Blue gradients
+- **Typography**: High-contrast light text for readability.
+
+## 📝 API Endpoints (Prototype)
+
+- `GET /api/documents`: List all uploaded files.
+- `POST /api/upload`: Handle file storage.
+- `GET /api/user`: Fetch current user details.
+- `POST /api/process`: Simulate AI processing.
