@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {FileText, MoreVertical, Calendar, HardDrive} from 'lucide-react';
 import Modal from './Modal';
 import {formatBytes} from '../utils/formatBytes';
+import {toast} from 'sonner';
 
 export default function DocumentList({documents, onRefresh}) {
 	const [activeMenu, setActiveMenu] = useState(null);
@@ -19,6 +20,7 @@ export default function DocumentList({documents, onRefresh}) {
 
 	const confirmDelete = async () => {
 		if (!fileToDelete) return;
+		const toastId = toast.loading('Deleting document...');
 		try {
 			const res = await fetch(
 				`/api/documents/${encodeURIComponent(fileToDelete)}`,
@@ -30,8 +32,10 @@ export default function DocumentList({documents, onRefresh}) {
 				const data = await res.json();
 				throw new Error(data.error || 'Failed to delete');
 			}
-			onRefresh?.();
+			if (onRefresh) onRefresh();
+			toast.success('Document deleted', {id: toastId});
 		} catch (err) {
+			toast.error('Failed to delete document', {id: toastId});
 		} finally {
 			setFileToDelete(null);
 			setDeleteModalOpen(false);

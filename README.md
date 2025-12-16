@@ -55,6 +55,21 @@ The application is structured for modularity and reusability:
 3.  **Open the app**:
     Visit [http://localhost:3000](http://localhost:3000)
 
+## 🧠 Design Choices & Assumptions
+
+### Design Decisions
+
+1.  **Component-Based Architecture**: UI elements like `DocumentList`, `Loader`, and Tabs are extracted into reusable components to maintain a clean `pages/index.js` and separation of concerns.
+2.  **Client-Side Navigation**: Used Next.js `Link` and `useRouter` for seamless SPA-like transitions without full page reloads.
+3.  **Optimistic UI**: Simple loading states are used (spinners/skeletons) to provide immediate feedback during async operations (upload/delete).
+
+### Assumptions
+
+- **Local Storage**: For this prototype, files are stored locally in `public/uploads`. In a production environment, this would be replaced by an S3/Blob storage solution.
+- **Mock AI**: The "AI Summary" feature uses a mock delay and hardcoded response to simulate LLM processing without incurring API costs during review.
+- **Single User**: The current `user` API is mocked for a single admin user context.
+- **Browser Support**: Tested primarily on modern Chrome browser.
+
 ## 🎨 Theme
 
 The project uses a custom theme by default:

@@ -1,5 +1,11 @@
-import "@/styles/globals.css";
+import '@/styles/globals.css';
+import {Toaster} from 'sonner';
 
-export default function App({ Component, pageProps }) {
-  return <Component {...pageProps} />;
+export default function App({Component, pageProps}) {
+	return (
+		<>
+			<Component {...pageProps} />
+			<Toaster position="bottom-right" theme="dark" richColors />
+		</>
+	);
 }

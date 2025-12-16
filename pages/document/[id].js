@@ -15,6 +15,7 @@ import Loader from '../../components/Loader';
 import SummaryTab from '../../components/tabs/SummaryTab';
 import MarkdownTab from '../../components/tabs/MarkdownTab';
 import OriginalTab from '../../components/tabs/OriginalTab';
+import {toast} from 'sonner';
 
 export default function DocumentView() {
 	const router = useRouter();
@@ -34,6 +35,7 @@ export default function DocumentView() {
 
 	const handleProcess = async () => {
 		setProcessing(true);
+		const toastId = toast.loading('Analyzing document with AI...');
 		try {
 			const res = await fetch('/api/process', {
 				method: 'POST',
@@ -44,8 +46,10 @@ export default function DocumentView() {
 			const data = await res.json();
 			setProcessedData(data);
 			setActiveTab('overview');
+			toast.success('Analysis complete!', {id: toastId});
 		} catch (err) {
 			console.error(err);
+			toast.error('Failed to analyze document', {id: toastId});
 		} finally {
 			setProcessing(false);
 		}

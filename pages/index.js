@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import DocumentList from '../components/DocumentList';
 import {Upload, Loader2, AlertCircle} from 'lucide-react';
 import {clsx} from 'clsx';
+import {toast} from 'sonner';
 
 export default function Home() {
 	const [documents, setDocuments] = useState([]);
@@ -20,6 +21,7 @@ export default function Home() {
 			const data = await res.json();
 			setDocuments(data?.documents);
 		} catch (err) {
+			console.error(err);
 			setError(err?.message);
 		} finally {
 			setLoading(false);
@@ -58,6 +60,7 @@ export default function Home() {
 		setError(null);
 		const formData = new FormData();
 		formData.append('file', file);
+		const toastId = toast.loading('Uploading document...');
 		try {
 			const res = await fetch('/api/upload', {
 				method: 'POST',
@@ -68,8 +71,10 @@ export default function Home() {
 				throw new Error(data.error || 'Upload failed');
 			}
 			await fetchDocuments();
+			toast.success('Document uploaded successfully!', {id: toastId});
 		} catch (err) {
 			setError(err?.message);
+			toast.error(err?.message || 'Upload failed', {id: toastId});
 		} finally {
 			setUploading(false);
 			if (fileInputRef.current) {
